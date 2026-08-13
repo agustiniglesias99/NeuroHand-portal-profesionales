@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
-import { formatRelative, formatDate } from '../utils/date'
-import type { PatientStatus, NewsItem } from '../types'
+import { formatMonoDate, formatMonoDay } from '../utils/date'
+import type { Patient, PatientStatus, NewsItem } from '../types'
 
 const STATUS_LABEL: Record<PatientStatus, string> = {
   active: 'Activo',
@@ -11,27 +11,27 @@ const STATUS_LABEL: Record<PatientStatus, string> = {
   'on-hold': 'En espera',
 }
 
-const STATUS_STYLE: Record<PatientStatus, string> = {
-  active: 'bg-emerald-100 text-emerald-700',
-  discharged: 'bg-slate-100 text-slate-600',
-  'on-hold': 'bg-amber-100 text-amber-700',
+const STATUS_BADGE: Record<PatientStatus, string> = {
+  active: 'bg-ok-bg text-ok',
+  discharged: 'bg-neutral-bg text-neutral',
+  'on-hold': 'bg-warn-bg text-warn',
 }
 
-const NEWS_ICON: Record<NewsItem['type'], string> = {
-  session: '🗂',
-  assignment: '➕',
-  'status-change': '🔄',
-  note: '📝',
-}
-
-const NEWS_STYLE: Record<NewsItem['type'], string> = {
-  session: 'bg-blue-50 border-blue-200 text-blue-700',
-  assignment: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-  'status-change': 'bg-amber-50 border-amber-200 text-amber-700',
-  note: 'bg-slate-50 border-slate-200 text-slate-600',
+const NEWS_DOT: Record<NewsItem['type'], string> = {
+  session: 'bg-brand-600',
+  assignment: 'bg-ok',
+  'status-change': 'bg-neutral',
+  note: 'bg-warn',
 }
 
 type StatusFilter = PatientStatus | 'all'
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'Todos' },
+  { value: 'active', label: 'Activos' },
+  { value: 'on-hold', label: 'En espera' },
+  { value: 'discharged', label: 'Alta' },
+]
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -43,22 +43,16 @@ export function DashboardPage() {
   const activePatients = patients.filter((p) => p.status === 'active').length
   const onHoldPatients = patients.filter((p) => p.status === 'on-hold').length
   const activeActivities = activities.filter((a) => a.status === 'active').length
-  const completedSessions = activities.flatMap((a) => a.sessions).filter((s) => s.completed).length
+  const allSessions = activities.flatMap((a) => a.sessions)
+  const completedSessions = allSessions.filter((s) => s.completed).length
 
   const filtered = patients.filter((p) => {
+    const q = search.toLowerCase()
     const matchesSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.diagnosis.toLowerCase().includes(search.toLowerCase())
+      p.name.toLowerCase().includes(q) || p.diagnosis.toLowerCase().includes(q)
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter
     return matchesSearch && matchesStatus
   })
-
-  const statusOptions: { value: StatusFilter; label: string }[] = [
-    { value: 'all', label: 'Todos' },
-    { value: 'active', label: 'Activos' },
-    { value: 'on-hold', label: 'En espera' },
-    { value: 'discharged', label: 'Alta' },
-  ]
 
   const today = new Date().toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -67,150 +61,224 @@ export function DashboardPage() {
     year: 'numeric',
   })
 
+  function activityCount(patient: Patient): number {
+    return activities.filter((a) => a.patientId === patient.id).length
+  }
+
+  function exportReport() {
+    const rows = [
+      ['Nombre', 'Estado', 'Diagnóstico', 'Ingreso', 'Actividades'],
+      ...filtered.map((p) => [
+        p.name,
+        STATUS_LABEL[p.status],
+        p.diagnosis,
+        p.admissionDate,
+        String(activityCount(p)),
+      ]),
+    ]
+    const csv = rows
+      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+      .join('\r\n')
+
+    // BOM so Excel reads the accents correctly.
+    const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `neurohand-pacientes-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">
-          Bienvenido, {user?.displayName}
-        </h1>
-        <p className="text-slate-500 text-sm capitalize mt-0.5">{today}</p>
+    <div className="px-6 py-[34px] lg:px-10">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="m-0 font-meta text-[10.5px] tracking-[.12em] text-brand-600">
+            PANEL GENERAL
+          </p>
+          <h1 className="m-0 mt-2.5 font-display text-[30px] font-normal tracking-[-.02em] lg:text-[38px]">
+            Bienvenido, {user?.displayName}
+          </h1>
+          <p className="m-0 mt-1 text-[13.5px] capitalize text-ink-350">{today}</p>
+        </div>
+        <button
+          onClick={exportReport}
+          className="rounded-[9px] border border-line-400 bg-white px-5 py-[11px] text-[14px] font-medium text-brand-600 transition-colors hover:bg-paper-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+        >
+          Exportar informe
+        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Pacientes activos" value={activePatients} color="blue" />
-        <StatCard label="En espera" value={onHoldPatients} color="amber" />
-        <StatCard label="Actividades activas" value={activeActivities} color="emerald" />
-        <StatCard label="Sesiones completadas" value={completedSessions} color="slate" />
+      <div className="mt-[26px] grid gap-px overflow-hidden rounded-[13px] border border-line-200 bg-line-200 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCell value={activePatients} of={patients.length} label="Pacientes activos" tone="brand" />
+        <StatCell value={onHoldPatients} of={patients.length} label="En espera" tone="warn" />
+        <StatCell value={activeActivities} of={activities.length} label="Actividades activas" tone="ok" />
+        <StatCell
+          value={completedSessions}
+          of={allSessions.length}
+          label="Sesiones completadas"
+          tone="ink"
+        />
       </div>
 
-      {/* Patients + News */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-        {/* Patient list */}
-        <div className="xl:col-span-3 bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <div className="p-4 border-b border-slate-100">
-            <h2 className="font-semibold text-slate-800 mb-3">Pacientes</h2>
+      <div className="mt-5 grid gap-5 xl:grid-cols-[1.55fr_1fr]">
+        <section className="overflow-hidden rounded-[13px] border border-line-200 bg-white">
+          <div className="border-b border-line-100 px-[22px] pb-4 pt-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="m-0 text-[16px] font-semibold">Pacientes</h2>
+              <span className="font-meta text-[10.5px] text-ink-200">
+                {filtered.length} {filtered.length === 1 ? 'REGISTRO' : 'REGISTROS'}
+              </span>
+            </div>
 
-            {/* Search */}
+            <label htmlFor="patient-search" className="sr-only">
+              Buscar pacientes
+            </label>
             <input
-              type="text"
-              placeholder="Buscar por nombre o diagnóstico..."
+              id="patient-search"
+              type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-3"
+              placeholder="Buscar por nombre o diagnóstico…"
+              className="mt-3.5 w-full rounded-[9px] border border-line-200 bg-paper-050 px-3.5 py-[11px] text-[14px] text-ink outline-none transition-colors placeholder:text-ink-200 focus:border-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600"
             />
 
-            {/* Status filter chips */}
-            <div className="flex gap-2 flex-wrap">
-              {statusOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setStatusFilter(opt.value)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    statusFilter === opt.value
-                      ? 'bg-blue-700 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {STATUS_OPTIONS.map((opt) => {
+                const on = statusFilter === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setStatusFilter(opt.value)}
+                    aria-pressed={on}
+                    className={`rounded-full px-3.5 py-[7px] text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${
+                      on
+                        ? 'bg-brand-600 text-white'
+                        : 'border border-line bg-paper-shell text-ink-400 hover:bg-paper-tint'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
-          <div className="divide-y divide-slate-50">
+          <div className="max-h-[404px] overflow-auto">
             {filtered.length === 0 ? (
-              <p className="text-slate-400 text-sm text-center py-10">
-                No se encontraron pacientes.
+              <p className="px-[22px] py-14 text-center text-[14px] text-ink-200">
+                Ningún paciente coincide con la búsqueda.
               </p>
             ) : (
               filtered.map((patient) => {
-                const patientActivities = activities.filter((a) => a.patientId === patient.id)
+                const count = activityCount(patient)
                 return (
                   <button
                     key={patient.id}
                     onClick={() => navigate(`/patients/${patient.id}`)}
-                    className="w-full text-left px-4 py-3.5 hover:bg-slate-50 transition-colors"
+                    className="flex w-full items-center gap-4 border-b border-paper-200 px-[22px] py-4 text-left transition-colors hover:bg-paper-row focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-600"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-medium text-slate-900 text-sm truncate">
-                            {patient.name}
-                          </p>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${STATUS_STYLE[patient.status]}`}>
-                            {STATUS_LABEL[patient.status]}
-                          </span>
-                        </div>
-                        <p className="text-slate-500 text-xs truncate">{patient.diagnosis}</p>
-                        <p className="text-slate-400 text-xs mt-1">
-                          Ingreso: {formatDate(patient.admissionDate)} · {patientActivities.length} actividad{patientActivities.length !== 1 ? 'es' : ''}
-                        </p>
-                      </div>
-                      <svg className="w-4 h-4 text-slate-400 shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
+                    <span
+                      aria-hidden="true"
+                      className="grid h-[38px] w-[38px] flex-none place-items-center rounded-[10px] bg-avatar text-[12.5px] font-semibold text-brand-600"
+                    >
+                      {initials(patient.name)}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2.5">
+                        <span className="text-[15.5px] font-semibold text-ink">{patient.name}</span>
+                        <span
+                          className={`rounded-[5px] px-2 py-[3px] font-meta text-[10px] uppercase tracking-[.06em] ${STATUS_BADGE[patient.status]}`}
+                        >
+                          {STATUS_LABEL[patient.status]}
+                        </span>
+                      </span>
+                      <span className="mt-[3px] block text-[13.5px] text-ink-400">
+                        {patient.diagnosis}
+                      </span>
+                      <span className="mt-[5px] block font-meta text-[11px] text-ink-200">
+                        INGRESO {formatMonoDate(patient.admissionDate)} · {count}{' '}
+                        {count === 1 ? 'ACTIVIDAD' : 'ACTIVIDADES'}
+                      </span>
+                    </span>
+                    <span aria-hidden="true" className="text-[17px] text-chevron">
+                      ›
+                    </span>
                   </button>
                 )
               })
             )}
           </div>
-        </div>
+        </section>
 
-        {/* News feed */}
-        <div className="xl:col-span-2 bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <div className="p-4 border-b border-slate-100">
-            <h2 className="font-semibold text-slate-800">Novedades recientes</h2>
+        <section className="flex flex-col overflow-hidden rounded-[13px] border border-line-200 bg-white">
+          <div className="border-b border-line-100 px-[22px] pb-4 pt-5">
+            <h2 className="m-0 text-[16px] font-semibold">Novedades recientes</h2>
           </div>
-          <div className="divide-y divide-slate-50 overflow-y-auto max-h-[520px]">
+          <div className="max-h-[472px] overflow-auto">
             {news.map((item) => (
-              <div key={item.id} className="px-4 py-3.5">
-                <div className="flex items-start gap-2.5">
-                  <span className={`text-base px-1.5 py-0.5 rounded border text-xs shrink-0 mt-0.5 ${NEWS_STYLE[item.type]}`}>
-                    {NEWS_ICON[item.type]}
+              <article key={item.id} className="border-b border-paper-200 px-[22px] py-4">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    aria-hidden="true"
+                    className={`h-1.5 w-1.5 flex-none rounded-full ${NEWS_DOT[item.type]}`}
+                  />
+                  <button
+                    onClick={() => navigate(`/patients/${item.patientId}`)}
+                    className="rounded-sm text-[14px] font-semibold text-deep-800 transition-colors hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                  >
+                    {item.patientName}
+                  </button>
+                  <span className="ml-auto font-meta text-[10.5px] text-meta-dim">
+                    {formatMonoDay(item.date)}
                   </span>
-                  <div className="min-w-0">
-                    <button
-                      onClick={() => navigate(`/patients/${item.patientId}`)}
-                      className="text-xs font-semibold text-blue-700 hover:underline"
-                    >
-                      {item.patientName}
-                    </button>
-                    <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{item.message}</p>
-                    <p className="text-xs text-slate-400 mt-1">{formatRelative(item.date)}</p>
-                  </div>
                 </div>
-              </div>
+                <p className="m-0 mt-[7px] pl-4 text-[13.5px] leading-[1.55] text-ink-400">
+                  {item.message}
+                </p>
+              </article>
             ))}
           </div>
-        </div>
+        </section>
       </div>
     </div>
   )
 }
 
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string
-  value: number
-  color: 'blue' | 'amber' | 'emerald' | 'slate'
-}) {
-  const styles = {
-    blue: 'bg-blue-50 border-blue-200 text-blue-700',
-    amber: 'bg-amber-50 border-amber-200 text-amber-700',
-    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    slate: 'bg-slate-50 border-slate-200 text-slate-600',
-  }
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase()
+}
 
+const TONE: Record<string, string> = {
+  brand: 'text-brand-600',
+  warn: 'text-warn',
+  ok: 'text-ok',
+  ink: 'text-ink',
+}
+
+function StatCell({
+  value,
+  of,
+  label,
+  tone,
+}: {
+  value: number
+  of: number
+  label: string
+  tone: keyof typeof TONE
+}) {
   return (
-    <div className={`rounded-xl border p-4 ${styles[color]}`}>
-      <p className="text-3xl font-bold">{value}</p>
-      <p className="text-xs font-medium mt-1 opacity-80">{label}</p>
+    <div className="bg-white px-[22px] pb-[22px] pt-5">
+      <div className="flex items-baseline gap-[9px]">
+        <span className={`font-display text-[38px] leading-none ${TONE[tone]}`}>{value}</span>
+        <span className={`font-meta text-[10.5px] ${TONE[tone]}`}>DE {of}</span>
+      </div>
+      <p className="m-0 mt-2.5 text-[13.5px] text-ink-400">{label}</p>
     </div>
   )
 }

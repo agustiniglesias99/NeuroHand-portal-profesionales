@@ -1,6 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import heroImg from '../assets/hero.png'
+
+/** Content shell: section backgrounds bleed full width, content stays centred. */
+const SHELL = 'mx-auto w-full max-w-[1440px] px-6 md:px-10 lg:px-14'
 
 const NAV_LINKS = [
   { href: '#nosotros', label: 'Nosotros' },
@@ -10,16 +13,13 @@ const NAV_LINKS = [
 ]
 
 export function LandingPage() {
-  const [menuOpen, setMenuOpen] = useState(false)
-
   return (
-    <div className="min-h-screen bg-white text-slate-800">
-      <Header menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+    <div className="bg-paper font-body text-ink">
+      <Header />
       <main>
         <Hero />
         <Nosotros />
         <Guante />
-        <Beneficios />
         <Imagenes />
         <Contacto />
       </main>
@@ -30,123 +30,165 @@ export function LandingPage() {
 
 /* ---------------------------------------------------------------- Header */
 
-function Header({
-  menuOpen,
-  setMenuOpen,
-}: {
-  menuOpen: boolean
-  setMenuOpen: (v: boolean) => void
-}) {
+function Header() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#top" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-blue-700 rounded-lg flex items-center justify-center text-white text-xs font-bold">
-            NH
-          </div>
-          <span className="font-bold text-lg text-slate-900">NeuroHand</span>
+    <header className="sticky top-0 z-20 border-b border-line bg-paper/[.86] backdrop-blur-[14px]">
+      <div className={`${SHELL} flex items-center justify-between py-[18px]`}>
+        <a href="#top" className="flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
+          <Monogram />
+          <span className="font-display text-[21px] font-medium tracking-[-.01em] text-ink">
+            NeuroHand
+          </span>
         </a>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden items-center gap-[34px] lg:flex">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-base font-medium text-slate-600 hover:text-blue-700 transition-colors"
+              className="rounded-sm text-[14.5px] text-ink-500 transition-colors hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
             >
               {link.label}
             </a>
           ))}
-          <Link
-            to="/login"
-            className="text-base font-medium px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition-colors"
-          >
-            Portal médico
-          </Link>
+          <PortalLink />
         </nav>
 
-        {/* Mobile toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-slate-700"
-          aria-label="Abrir menú"
+          className="rounded-md p-1 text-ink-500 transition-colors hover:text-brand-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 lg:hidden"
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d={menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+            <path
+              strokeLinecap="round"
+              d={menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 7h16M4 12h16M4 17h16'}
+            />
           </svg>
         </button>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
-        <nav className="md:hidden border-t border-slate-200 bg-white px-6 py-3 space-y-1">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="block py-2 text-base font-medium text-slate-600 hover:text-blue-700"
-            >
-              {link.label}
-            </a>
-          ))}
-          <Link
-            to="/login"
-            className="block mt-2 text-center text-base font-medium px-4 py-2 bg-blue-700 text-white rounded-lg"
-          >
-            Portal médico
-          </Link>
+        <nav className="border-t border-line bg-paper lg:hidden">
+          <div className={`${SHELL} pb-5 pt-2`}>
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="block border-b border-line py-3 text-[15px] text-ink-500"
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="mt-4">
+              <PortalLink />
+            </div>
+          </div>
         </nav>
       )}
     </header>
   )
 }
 
+function Monogram({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  const box = size === 'sm' ? 'h-7 w-7 rounded-lg text-[10.5px]' : 'h-[34px] w-[34px] rounded-[9px] text-[12px]'
+  return (
+    <span
+      aria-hidden="true"
+      className={`grid place-items-center bg-brand-600 font-semibold tracking-[.04em] text-white ${box}`}
+    >
+      NH
+    </span>
+  )
+}
+
+function PortalLink() {
+  return (
+    <Link
+      to="/login"
+      className="inline-block rounded-lg bg-brand-600 px-5 py-2.5 text-center text-[14px] font-medium text-white shadow-[0_1px_2px_rgba(0,42,45,.25)] transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+    >
+      Portal médico
+    </Link>
+  )
+}
+
 /* ------------------------------------------------------------------ Hero */
+
+const HERO_STATS = [
+  { value: '5', label: 'sensores por mano' },
+  { value: '100%', label: 'sesiones registradas' },
+  { value: '24/7', label: 'acceso al panel' },
+]
 
 function Hero() {
   return (
     <section
       id="top"
-      className="relative pt-16 bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 text-white overflow-hidden"
+      className="relative overflow-hidden bg-deep-800 bg-[radial-gradient(120%_90%_at_88%_12%,#05787d_0%,#00575b_38%,#00393c_72%,#002a2d_100%)] py-20 text-white lg:pb-[108px] lg:pt-28"
     >
-      <div className="max-w-6xl mx-auto px-6 py-20 lg:py-28 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 text-xs font-medium mb-5">
-            Rehabilitación motora de la mano
-          </span>
-          <h1 className="text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
-            Rehabilitación más interactiva, accesible y medible
-          </h1>
-          <p className="mt-5 text-blue-100 text-xl leading-relaxed">
-            NeuroHand combina un guante inteligente sensorizado con una plataforma
-            digital interactiva para acompañar la rehabilitación motriz de la mano,
-            favoreciendo la adherencia al tratamiento y el seguimiento del proceso
-            terapéutico.
+      <div className="nh-grid absolute inset-0 opacity-[.16]" aria-hidden="true" />
+
+      <div
+        className={`${SHELL} relative grid items-center gap-14 lg:grid-cols-[1.05fr_.95fr] lg:gap-16`}
+      >
+        <div className="max-w-[600px]">
+          <p className="inline-flex items-center gap-[9px] rounded-full border border-mint-200/35 bg-brand-600/35 py-[7px] pl-[11px] pr-[14px]">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-mint-400" />
+            <span className="font-meta text-[11px] uppercase tracking-[.09em] text-mint-200">
+              Rehabilitación motora de la mano
+            </span>
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+
+          <h1 className="mt-[26px] font-display text-[42px] font-normal leading-[1.05] tracking-[-.025em] text-pretty sm:text-[54px] lg:text-[66px]">
+            Rehabilitación más <em className="italic text-mint-300">interactiva</em>, accesible y
+            medible
+          </h1>
+
+          <p className="mt-[26px] max-w-[520px] text-[17px] leading-[1.62] text-on-deep">
+            NeuroHand combina un guante inteligente sensorizado con una plataforma digital
+            interactiva para acompañar la rehabilitación motriz de la mano, favoreciendo la
+            adherencia al tratamiento y el seguimiento del proceso terapéutico.
+          </p>
+
+          <div className="mt-9 flex flex-wrap gap-3">
             <a
               href="#guante"
-              className="px-6 py-3 bg-white text-blue-800 font-medium rounded-lg hover:bg-blue-50 transition-colors"
+              className="rounded-[9px] bg-white px-[26px] py-3.5 text-[15px] font-semibold text-deep-800 transition-colors hover:bg-[#d9f0ef] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint-300"
             >
               Conocé el guante
             </a>
             <a
               href="#contacto"
-              className="px-6 py-3 border border-blue-400/50 text-white font-medium rounded-lg hover:bg-blue-800/50 transition-colors"
+              className="rounded-[9px] border border-mint-200/40 px-[26px] py-3.5 text-[15px] font-medium text-[#dceceb] transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint-300"
             >
               Contactanos
             </a>
           </div>
+
+          <dl className="mt-14 flex flex-wrap gap-x-11 gap-y-6 border-t border-mint-200/20 pt-7">
+            {HERO_STATS.map((stat) => (
+              <div key={stat.label}>
+                <dt className="sr-only">{stat.label}</dt>
+                <dd className="m-0">
+                  <span className="block font-display text-[30px] text-white">{stat.value}</span>
+                  <span className="mt-0.5 block text-[12.5px] text-on-deep-dim">{stat.label}</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
-        <div className="relative flex justify-center">
-          <div className="absolute w-72 h-72 bg-blue-500/30 rounded-full blur-3xl" />
+        <div className="relative grid h-[340px] place-items-center overflow-hidden rounded-2xl border border-mint-200/[.28] bg-[linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02))] lg:h-[440px]">
+          <div className="nh-hatch-dark absolute inset-0" aria-hidden="true" />
           <img
             src={heroImg}
-            alt="Dispositivo NeuroHand"
-            className="relative w-64 lg:w-80 drop-shadow-2xl"
+            alt="Guante NeuroHand colocado en una mano"
+            className="relative max-h-[78%] w-auto max-w-[70%] object-contain drop-shadow-[0_18px_40px_rgba(0,25,27,.45)]"
           />
         </div>
       </div>
@@ -156,214 +198,170 @@ function Hero() {
 
 /* -------------------------------------------------------------- Nosotros */
 
-function Nosotros() {
-  return (
-    <Section id="nosotros" eyebrow="Nosotros" title="Una solución integral para la rehabilitación">
-      <div className="grid lg:grid-cols-2 gap-10 items-start">
-        <p className="text-lg text-slate-600 leading-relaxed">
-          NeuroHand nace para brindar una experiencia de rehabilitación motora más
-          interactiva, accesible y medible. Nuestra propuesta integra tecnologías de
-          sensado, seguimiento y actividades terapéuticas digitales con el fin de
-          acompañar los procesos de rehabilitación de manera más participativa y
-          cuantificable.
-        </p>
-        <p className="text-lg text-slate-600 leading-relaxed">
-          La solución está pensada para centros de rehabilitación, clínicas, consultorios
-          y profesionales de fisioterapia y terapia ocupacional, ofreciendo herramientas
-          que complementan —sin reemplazar— la labor del profesional de la salud y
-          potencian el vínculo con el paciente durante todo el tratamiento.
-        </p>
-      </div>
-
-      <div className="grid sm:grid-cols-3 gap-5 mt-12">
-        <PillarCard
-          title="Guante inteligente"
-          text="Dispositivo sensorizado que captura el movimiento de la mano y brinda retroalimentación háptica."
-        />
-        <PillarCard
-          title="Software para pacientes"
-          text="Actividades terapéuticas interactivas con historial, progreso y métricas de desempeño."
-        />
-        <PillarCard
-          title="Gestión para profesionales"
-          text="Seguimiento de la evolución, administración de pacientes y visualización de indicadores."
-        />
-      </div>
-    </Section>
-  )
-}
-
-function PillarCard({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
-      <h3 className="font-semibold text-slate-900 mb-2">{title}</h3>
-      <p className="text-base text-slate-600 leading-relaxed">{text}</p>
-    </div>
-  )
-}
-
-/* ---------------------------------------------------------------- Guante */
-
-const GLOVE_FEATURES = [
+const PILLARS = [
   {
-    title: 'Captura de movimientos',
-    text: 'Sensores que registran la motricidad de la mano y los dedos durante cada ejercicio.',
+    index: '01',
+    title: 'Guante inteligente',
+    text: 'Dispositivo sensorizado que captura el movimiento de la mano y brinda retroalimentación háptica.',
   },
   {
-    title: 'Retroalimentación háptica',
-    text: 'Vibración que guía y refuerza al paciente en tiempo real durante las actividades.',
+    index: '02',
+    title: 'Software para pacientes',
+    text: 'Actividades terapéuticas interactivas con historial, progreso y métricas de desempeño.',
   },
   {
-    title: 'Actividades interactivas',
-    text: 'El guante interactúa con ejercicios terapéuticos digitales que motivan la participación.',
-  },
-  {
-    title: 'Transmisión de datos',
-    text: 'La información viaja a la plataforma para registrar el progreso y generar métricas.',
+    index: '03',
+    title: 'Gestión para profesionales',
+    text: 'Seguimiento de la evolución, administración de pacientes y visualización de indicadores.',
   },
 ]
 
-function Guante() {
+function Nosotros() {
   return (
-    <section id="guante" className="scroll-mt-20 bg-slate-50 border-y border-slate-200">
-      <div className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="relative flex justify-center order-last lg:order-first">
-            <div className="absolute w-64 h-64 bg-blue-200/50 rounded-full blur-3xl" />
-            <img src={heroImg} alt="Guante NeuroHand" className="relative w-60 lg:w-72" />
-          </div>
+    <section id="nosotros" className="scroll-mt-24 bg-paper py-20 lg:py-[104px]">
+      <div className={SHELL}>
+        <Eyebrow rule>Nosotros</Eyebrow>
+        <h2 className="mt-5 max-w-[640px] font-display text-[34px] font-normal leading-[1.1] tracking-[-.02em] text-ink lg:text-[46px]">
+          Una solución integral para la rehabilitación
+        </h2>
 
-          <div>
-            <p className="text-blue-700 font-semibold text-base uppercase tracking-wide mb-2">
-              El Guante NeuroHand
-            </p>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-              Tecnología sensorizada al servicio de la recuperación
-            </h2>
-            <p className="text-lg text-slate-600 leading-relaxed mb-8">
-              Un guante ligero y ergonómico que convierte cada sesión de rehabilitación
-              en una experiencia interactiva y medible, integrándose de forma natural con
-              la plataforma de software.
-            </p>
+        <div className="mt-10 grid max-w-[1100px] gap-10 md:grid-cols-2 md:gap-14">
+          <p className="m-0 text-[16.5px] leading-[1.7] text-ink-500">
+            NeuroHand nace para brindar una experiencia de rehabilitación motora más interactiva,
+            accesible y medible. Nuestra propuesta integra tecnologías de sensado, seguimiento y
+            actividades terapéuticas digitales con el fin de acompañar los procesos de
+            rehabilitación de manera más participativa y cuantificable.
+          </p>
+          <p className="m-0 text-[16.5px] leading-[1.7] text-ink-500">
+            La solución está pensada para centros de rehabilitación, clínicas, consultorios y
+            profesionales de fisioterapia y terapia ocupacional, ofreciendo herramientas que
+            complementan —sin reemplazar— la labor del profesional de la salud y potencian el
+            vínculo con el paciente durante todo el tratamiento.
+          </p>
+        </div>
 
-            <div className="grid sm:grid-cols-2 gap-5">
-              {GLOVE_FEATURES.map((f) => (
-                <div key={f.title} className="flex gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 text-base">{f.title}</h3>
-                    <p className="text-base text-slate-600 mt-0.5 leading-relaxed">{f.text}</p>
-                  </div>
-                </div>
-              ))}
+        <div className="mt-14 grid gap-px overflow-hidden rounded-[14px] border border-line-200 bg-line-200 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
+          {PILLARS.map((pillar) => (
+            <div
+              key={pillar.index}
+              className="bg-white px-[30px] pb-[38px] pt-[34px] transition-colors hover:bg-paper-tint"
+            >
+              <span className="font-meta text-[11px] text-ink-200">{pillar.index}</span>
+              <h3 className="mb-2.5 mt-[18px] text-[18px] font-semibold text-deep-800">
+                {pillar.title}
+              </h3>
+              <p className="m-0 text-[15px] leading-[1.65] text-ink-400">{pillar.text}</p>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
   )
 }
 
-/* ------------------------------------------------------------ Beneficios */
+/* ---------------------------------------------------------------- Guante */
 
-const BENEFITS = [
-  {
-    title: 'Mayor adherencia al tratamiento',
-    text: 'Las experiencias interactivas promueven una participación activa del paciente, sesión tras sesión.',
-  },
-  {
-    title: 'Seguimiento medible',
-    text: 'Registro de métricas e historial de desempeño para visualizar la evolución del proceso terapéutico.',
-  },
-  {
-    title: 'Decisiones informadas',
-    text: 'Información centralizada que apoya el análisis y la toma de decisiones del profesional.',
-  },
-  {
-    title: 'Motivación constante',
-    text: 'La retroalimentación háptica y los ejercicios gamificados mantienen al paciente comprometido.',
-  },
-  {
-    title: 'Más accesible',
-    text: 'Una alternativa potencialmente más económica frente a dispositivos especializados de alto costo.',
-  },
-  {
-    title: 'Menos tareas manuales',
-    text: 'Reduce el registro y la consulta manual de actividades, centralizando todo en un solo lugar.',
-  },
+const GLOVE_FEATURES = [
+  { index: '01', text: 'Captura de movimiento dedo por dedo en tiempo real' },
+  { index: '02', text: 'Retroalimentación háptica durante cada ejercicio' },
+  { index: '03', text: 'Datos sincronizados con el panel del profesional' },
 ]
 
-function Beneficios() {
+function Guante() {
   return (
-    <Section
-      id="beneficios"
-      eyebrow="Beneficios para la rehabilitación"
-      title="Por qué NeuroHand marca la diferencia"
+    <section
+      id="guante"
+      className="scroll-mt-24 border-y border-line bg-paper-200 py-20 lg:py-[100px]"
     >
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {BENEFITS.map((b) => (
-          <div
-            key={b.title}
-            className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-200 transition-all"
-          >
-            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center mb-4">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-2">{b.title}</h3>
-            <p className="text-base text-slate-600 leading-relaxed">{b.text}</p>
-          </div>
-        ))}
+      <div className={`${SHELL} grid items-center gap-12 lg:grid-cols-2 lg:gap-16`}>
+        <div className="relative order-last grid h-[320px] place-items-center overflow-hidden rounded-[14px] border border-[#d3e0de] bg-paper-400 lg:order-first lg:h-[420px]">
+          <div className="nh-hatch-light absolute inset-0" aria-hidden="true" />
+          <img
+            src={heroImg}
+            alt="Detalle del guante NeuroHand"
+            className="relative max-h-[76%] w-auto max-w-[68%] object-contain"
+          />
+        </div>
+
+        <div>
+          <Eyebrow rule>El guante NeuroHand</Eyebrow>
+          <h2 className="mt-5 font-display text-[32px] font-normal leading-[1.1] tracking-[-.02em] text-ink lg:text-[44px]">
+            Tecnología sensorizada al servicio de la recuperación
+          </h2>
+          <p className="mt-[22px] max-w-[520px] text-[16.5px] leading-[1.7] text-ink-500">
+            Un guante ligero y ergonómico que convierte cada sesión de rehabilitación en una
+            experiencia interactiva y medible.
+          </p>
+
+          <ul className="mt-[34px] grid list-none gap-0.5 overflow-hidden rounded-xl bg-line-300 p-0">
+            {GLOVE_FEATURES.map((feature) => (
+              <li
+                key={feature.index}
+                className="flex items-baseline gap-4 bg-paper px-[22px] py-[18px]"
+              >
+                <span className="min-w-[22px] font-meta text-[11px] text-brand-600">
+                  {feature.index}
+                </span>
+                <span className="text-[15.5px] text-ink-600">{feature.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </Section>
+    </section>
   )
 }
 
 /* -------------------------------------------------------------- Imágenes */
 
 const GALLERY = [
-  { label: 'Guante sensorizado', from: 'from-blue-500', to: 'to-blue-700' },
-  { label: 'App del paciente', from: 'from-sky-500', to: 'to-blue-600' },
-  { label: 'Actividades interactivas', from: 'from-indigo-500', to: 'to-blue-700' },
-  { label: 'Panel del profesional', from: 'from-cyan-500', to: 'to-blue-600' },
-  { label: 'Métricas de progreso', from: 'from-blue-600', to: 'to-indigo-700' },
-  { label: 'Sesión de rehabilitación', from: 'from-teal-500', to: 'to-blue-600' },
+  { tag: 'IMG-01', name: 'Guante sensorizado' },
+  { tag: 'IMG-02', name: 'App del paciente' },
+  { tag: 'IMG-03', name: 'Actividades interactivas' },
+  { tag: 'IMG-04', name: 'Panel del profesional' },
+  { tag: 'IMG-05', name: 'Métricas de progreso' },
+  { tag: 'IMG-06', name: 'Sesión de rehabilitación' },
 ]
 
 function Imagenes() {
   return (
-    <section id="imagenes" className="scroll-mt-20 bg-slate-50 border-y border-slate-200">
-      <div className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-blue-700 font-semibold text-base uppercase tracking-wide mb-2">
+    <section id="imagenes" className="scroll-mt-24 bg-paper py-20 lg:py-[104px]">
+      <div className={SHELL}>
+        <div className="mx-auto max-w-[660px] text-center">
+          <span className="font-meta text-[11px] uppercase tracking-[.12em] text-brand-600">
             Imágenes
-          </p>
-          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">Conocé la solución en acción</h2>
-          <p className="text-lg text-slate-600 mt-3">
-            Una mirada al guante, la plataforma y las experiencias terapéuticas que
-            componen NeuroHand.
+          </span>
+          <h2 className="mt-4 font-display text-[34px] font-normal leading-[1.1] tracking-[-.02em] text-ink lg:text-[46px]">
+            Conocé la solución en acción
+          </h2>
+          <p className="mt-4 text-[16.5px] leading-[1.65] text-ink-400">
+            Una mirada al guante, la plataforma y las experiencias terapéuticas que componen
+            NeuroHand.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-[52px] lg:grid-cols-3">
           {GALLERY.map((item) => (
-            <div
-              key={item.label}
-              className={`aspect-[4/3] rounded-xl bg-gradient-to-br ${item.from} ${item.to} flex items-end p-5 relative overflow-hidden group`}
+            <figure
+              key={item.tag}
+              className="relative m-0 aspect-4/3 overflow-hidden rounded-[13px] border border-[#dbe5e4] bg-paper-300"
             >
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_20%,white,transparent_60%)]" />
-              <span className="relative text-white font-medium text-base drop-shadow">
-                {item.label}
+              <div className="nh-hatch-light absolute inset-0" aria-hidden="true" />
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,57,60,.82)_0%,rgba(0,57,60,.12)_52%,transparent_100%)]"
+              />
+              <span className="absolute left-4 top-3.5 font-meta text-[10.5px] tracking-[.08em] text-brand-600">
+                {item.tag}
               </span>
-            </div>
+              <figcaption className="absolute bottom-3.5 left-4 text-[15px] font-medium text-white">
+                {item.name}
+              </figcaption>
+            </figure>
           ))}
         </div>
-        <p className="text-center text-xs text-slate-400 mt-6">
+
+        <p className="mt-[26px] text-center font-meta text-[11.5px] text-ink-200">
           Imágenes ilustrativas — se reemplazarán por fotografías reales del producto.
         </p>
       </div>
@@ -373,87 +371,138 @@ function Imagenes() {
 
 /* -------------------------------------------------------------- Contacto */
 
+const CONTACT_DETAILS = [
+  { label: 'MAIL', value: 'contacto@neurohand.com' },
+  { label: 'SEDE', value: 'Universidad Nacional de La Matanza — Equipo 101' },
+]
+
 function Contacto() {
   const [sent, setSent] = useState(false)
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault()
     setSent(true)
   }
 
   return (
-    <Section id="contacto" eyebrow="Contacto" title="Hablemos sobre tu institución">
-      <div className="grid lg:grid-cols-2 gap-12">
+    <section
+      id="contacto"
+      className="scroll-mt-24 bg-deep-800 bg-[radial-gradient(90%_120%_at_10%_0%,#00575b_0%,#00393c_55%,#002a2d_100%)] py-20 text-white lg:py-[100px]"
+    >
+      <div className={`${SHELL} grid items-start gap-12 lg:grid-cols-2 lg:gap-[72px]`}>
         <div>
-          <p className="text-lg text-slate-600 leading-relaxed mb-8">
-            ¿Querés incorporar NeuroHand en tu centro de rehabilitación o conocer más
-            sobre la solución? Escribinos y nos pondremos en contacto.
+          <Eyebrow rule tone="dark">
+            Contacto
+          </Eyebrow>
+          <h2 className="mt-5 font-display text-[34px] font-normal leading-[1.1] tracking-[-.02em] lg:text-[46px]">
+            Hablemos sobre tu institución
+          </h2>
+          <p className="mt-[22px] max-w-[460px] text-[16.5px] leading-[1.7] text-on-deep">
+            ¿Querés incorporar NeuroHand en tu centro de rehabilitación o conocer más sobre la
+            solución? Escribinos y nos pondremos en contacto.
           </p>
-          <ul className="space-y-4 text-base">
-            <li className="flex items-center gap-3">
-              <ContactIcon path="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              <span className="text-slate-700">contacto@neurohand.com</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <ContactIcon path="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              <span className="text-slate-700">Universidad Nacional de La Matanza — Equipo 101</span>
-            </li>
-          </ul>
+
+          <div className="mt-9 grid gap-3.5">
+            {CONTACT_DETAILS.map((detail) => (
+              <div
+                key={detail.label}
+                className="flex flex-wrap items-center gap-x-3.5 gap-y-1 rounded-[10px] border border-mint-200/[.22] bg-white/[.04] px-[18px] py-4"
+              >
+                <span className="font-meta text-[10.5px] tracking-[.08em] text-mint-300">
+                  {detail.label}
+                </span>
+                <span className="text-[15.5px] text-[#e4f0ef]">{detail.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div>
+        <div className="rounded-[14px] bg-paper p-6 text-ink shadow-[0_20px_50px_rgba(0,25,27,.35)] sm:p-8">
           {sent ? (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-center">
-              <p className="text-emerald-700 font-medium">¡Gracias por tu mensaje!</p>
-              <p className="text-emerald-600 text-base mt-1">Te responderemos a la brevedad.</p>
+            <div className="py-6 text-center">
+              <p className="m-0 font-display text-[26px] text-deep-800">Mensaje enviado</p>
+              <p className="mx-auto mt-3 max-w-[320px] text-[15px] leading-[1.6] text-ink-400">
+                Gracias por escribirnos. Te respondemos dentro de las 48 hs hábiles.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSent(false)}
+                className="mt-6 font-meta text-[11.5px] uppercase tracking-[.1em] text-brand-600 underline underline-offset-4 transition-colors hover:text-brand-700"
+              >
+                Enviar otro mensaje
+              </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <input
-                  type="text"
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-3.5 sm:grid-cols-2">
+                <Field name="nombre" label="Nombre" placeholder="Nombre" required />
+                <Field name="institucion" label="Institución" placeholder="Institución" />
+              </div>
+              <div className="mt-3.5">
+                <Field
+                  name="email"
+                  type="email"
+                  label="Correo electrónico"
+                  placeholder="Correo electrónico"
                   required
-                  placeholder="Nombre"
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <input
-                  type="text"
-                  placeholder="Institución"
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <input
-                type="email"
-                required
-                placeholder="Correo electrónico"
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <textarea
-                required
-                rows={4}
-                placeholder="Tu mensaje"
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              />
+              <div className="mt-3.5">
+                <label htmlFor="mensaje" className="sr-only">
+                  Tu mensaje
+                </label>
+                <textarea
+                  id="mensaje"
+                  name="mensaje"
+                  rows={5}
+                  required
+                  placeholder="Tu mensaje"
+                  className="w-full resize-y rounded-[9px] border border-line-300 bg-white px-[15px] py-[13px] text-[15px] text-ink outline-none transition-colors placeholder:text-ink-300 focus:border-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600"
+                />
+              </div>
               <button
                 type="submit"
-                className="w-full sm:w-auto px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-lg transition-colors"
+                className="mt-[18px] w-full rounded-[9px] bg-brand-600 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
               >
                 Enviar mensaje
               </button>
+              <p className="mb-0 mt-3.5 text-center text-[12.5px] text-ink-300">
+                Respondemos dentro de las 48 hs hábiles.
+              </p>
             </form>
           )}
         </div>
       </div>
-    </Section>
+    </section>
   )
 }
 
-function ContactIcon({ path }: { path: string }) {
+function Field({
+  name,
+  label,
+  placeholder,
+  type = 'text',
+  required = false,
+}: {
+  name: string
+  label: string
+  placeholder: string
+  type?: string
+  required?: boolean
+}) {
   return (
-    <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d={path} />
-      </svg>
+    <div>
+      <label htmlFor={name} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        className="w-full rounded-[9px] border border-line-300 bg-white px-[15px] py-[13px] text-[15px] text-ink outline-none transition-colors placeholder:text-ink-300 focus:border-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600"
+      />
     </div>
   )
 }
@@ -462,18 +511,21 @@ function ContactIcon({ path }: { path: string }) {
 
 function Footer() {
   return (
-    <footer className="bg-blue-950 text-blue-200">
-      <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-white text-xs font-bold">
-            NH
-          </div>
-          <span className="font-bold text-white">NeuroHand</span>
+    <footer className="bg-deep-900 text-on-deep-dim">
+      <div
+        className={`${SHELL} flex flex-col items-center justify-between gap-5 py-[34px] sm:flex-row`}
+      >
+        <div className="flex items-center gap-[11px]">
+          <Monogram size="sm" />
+          <span className="font-display text-[17px] text-white">NeuroHand</span>
         </div>
-        <p className="text-xs text-blue-300">
+        <p className="m-0 text-center text-[13px]">
           © 2026 NeuroHand · Rehabilitación motora interactiva
         </p>
-        <Link to="/login" className="text-base font-medium text-white hover:text-blue-300 transition-colors">
+        <Link
+          to="/login"
+          className="rounded-sm text-[13.5px] font-medium text-mint-300 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mint-300"
+        >
           Portal médico →
         </Link>
       </div>
@@ -481,30 +533,32 @@ function Footer() {
   )
 }
 
-/* -------------------------------------------------------- Section helper */
+/* -------------------------------------------------------- Eyebrow helper */
 
-function Section({
-  id,
-  eyebrow,
-  title,
+function Eyebrow({
   children,
+  rule = false,
+  tone = 'light',
 }: {
-  id: string
-  eyebrow: string
-  title: string
-  children: React.ReactNode
+  children: ReactNode
+  rule?: boolean
+  tone?: 'light' | 'dark'
 }) {
   return (
-    <section id={id} className="scroll-mt-20">
-      <div className="max-w-6xl mx-auto px-6 py-20">
-        <div className="max-w-2xl mb-12">
-          <p className="text-blue-700 font-semibold text-base uppercase tracking-wide mb-2">
-            {eyebrow}
-          </p>
-          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900">{title}</h2>
-        </div>
+    <p className="flex items-center gap-3">
+      {rule && (
+        <span
+          aria-hidden="true"
+          className={`h-px w-[26px] ${tone === 'dark' ? 'bg-mint-400' : 'bg-brand-600'}`}
+        />
+      )}
+      <span
+        className={`font-meta text-[11px] uppercase tracking-[.12em] ${
+          tone === 'dark' ? 'text-mint-300' : 'text-brand-600'
+        }`}
+      >
         {children}
-      </div>
-    </section>
+      </span>
+    </p>
   )
 }

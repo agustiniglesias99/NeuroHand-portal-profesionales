@@ -14,6 +14,22 @@ export function formatShortDate(iso: string): string {
   })
 }
 
+/** "14 ENE 2026" — for the portal's monospace metadata lines. */
+export function formatMonoDate(iso: string): string {
+  return new Date(iso)
+    .toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+    .replace(/\./g, '')
+    .toUpperCase()
+}
+
+/** "11 JUN" — same, without the year. */
+export function formatMonoDay(iso: string): string {
+  return new Date(iso)
+    .toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+    .replace(/\./g, '')
+    .toUpperCase()
+}
+
 export function formatRelative(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime()
   const diffH = Math.floor(diffMs / (1000 * 60 * 60))

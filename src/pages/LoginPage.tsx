@@ -7,6 +7,9 @@ function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
 }
 
+const FIELD =
+  'w-full rounded-[9px] border border-line-300 bg-white px-[15px] py-[13px] text-[15px] text-ink outline-none transition-colors placeholder:text-ink-200 focus:border-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600'
+
 export function LoginPage() {
   const { login } = useAuth()
   const { doctors } = useData()
@@ -19,7 +22,7 @@ export function LoginPage() {
     e.preventDefault()
     setError('')
     if (!email || !password) {
-      setError('Por favor, ingresa tu correo y contraseña.')
+      setError('Ingresá tu correo y contraseña para continuar.')
       return
     }
 
@@ -52,66 +55,91 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-800 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-        {/* Brand */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-blue-950 rounded-xl mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-lg font-bold">NH</span>
+    <div className="relative grid min-h-screen place-items-center overflow-hidden bg-deep-800 bg-[radial-gradient(110%_90%_at_80%_10%,#05787d_0%,#00575b_36%,#00393c_70%,#002a2d_100%)] px-6 py-16 font-body">
+      <div className="nh-grid-login absolute inset-0 opacity-[.14]" aria-hidden="true" />
+
+      <div className="relative grid w-full max-w-[1080px] items-center gap-14 lg:grid-cols-[1fr_452px] lg:gap-20">
+        <div className="text-white">
+          <div className="flex items-center gap-3">
+            <span
+              aria-hidden="true"
+              className="grid h-[34px] w-[34px] place-items-center rounded-[9px] bg-brand-600 text-[12px] font-semibold"
+            >
+              NH
+            </span>
+            <span className="font-display text-[21px]">NeuroHand</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">NeuroHand Portal</h1>
-          <p className="text-slate-500 text-sm mt-1">
+
+          <h1 className="mt-[34px] font-display text-[38px] font-normal leading-[1.08] tracking-[-.025em] lg:text-[52px]">
             Portal de seguimiento de rehabilitación
+          </h1>
+          <p className="mt-5 max-w-[400px] text-[16px] leading-[1.65] text-on-deep">
+            Acceso exclusivo para profesionales. Gestioná pacientes, actividades y métricas de
+            evolución.
+          </p>
+          <p className="mt-11 border-t border-mint-200/20 pt-6 font-meta text-[11px] tracking-[.08em] text-[#7fadad]">
+            SESIÓN CIFRADA · DATOS CLÍNICOS PROTEGIDOS
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+        <div className="rounded-2xl bg-paper px-6 py-8 text-ink shadow-[0_28px_60px_rgba(0,25,27,.4)] sm:px-9 sm:py-[38px]">
+          <p className="font-meta text-[10.5px] tracking-[.12em] text-brand-600">INICIAR SESIÓN</p>
+          <h2 className="mt-3 font-display text-[30px] font-normal tracking-[-.02em]">
+            NeuroHand Portal
+          </h2>
+
+          <form onSubmit={handleSubmit} noValidate>
+            <label htmlFor="email" className="mt-7 block text-[13px] font-medium text-ink-500">
               Correo electrónico
             </label>
             <input
+              id="email"
               type="email"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="medico@hospital.es"
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+              className={`mt-2 ${FIELD}`}
             />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label htmlFor="password" className="mt-[18px] block text-[13px] font-medium text-ink-500">
               Contraseña
             </label>
             <input
+              id="password"
               type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+              className={`mt-2 ${FIELD}`}
             />
+
+            {error && (
+              <p
+                role="alert"
+                className="mt-4 rounded-[9px] border border-danger/25 bg-danger-bg px-[15px] py-3 text-[13.5px] text-danger"
+              >
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="mt-[26px] w-full rounded-[9px] bg-brand-600 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+            >
+              Iniciar sesión
+            </button>
+          </form>
+
+          <div className="mt-[22px] rounded-[10px] border border-line-200 bg-paper-tint px-[18px] py-4">
+            <p className="m-0 text-[12.5px] font-semibold text-deep-800">Accesos de demostración</p>
+            <div className="mt-2.5 grid gap-[5px] font-meta text-[11.5px] text-ink-400">
+              <span>Médico · javier.garcia@hospital.es</span>
+              <span>Administrador · admin@hospital.es</span>
+              <span className="text-ink-200">(cualquier contraseña)</span>
+            </div>
           </div>
-
-          {error && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-2.5 px-4 rounded-lg transition-colors mt-2"
-          >
-            Iniciar sesión
-          </button>
-        </form>
-
-        {/* Demo credentials hint */}
-        <div className="mt-6 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-xs text-slate-500 space-y-0.5">
-          <p className="font-medium text-slate-600">Accesos de demostración:</p>
-          <p>Médico: <span className="font-mono">javier.garcia@hospital.es</span></p>
-          <p>Administrador: <span className="font-mono">admin@hospital.es</span></p>
-          <p className="text-slate-400">(cualquier contraseña)</p>
         </div>
       </div>
     </div>

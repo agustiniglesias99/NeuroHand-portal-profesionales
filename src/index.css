@@ -1,5 +1,73 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------- NeuroHand design tokens */
+
+@theme {
+  --font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-body: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --font-meta: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Ink — text on light surfaces */
+  --color-ink: #0d2224;
+  --color-ink-600: #2b4547;
+  --color-ink-500: #3d5557;
+  --color-ink-400: #4c6567;
+  --color-ink-350: #6b8385;
+  --color-ink-300: #7d9294;
+  --color-ink-200: #8aa3a4;
+
+  /* Brand teal */
+  --color-brand-500: #05787d;
+  --color-brand-600: #00676c;
+  --color-brand-700: #004b4f;
+
+  /* Deep — dark section grounds */
+  --color-deep-600: #00464a;
+  --color-deep-700: #00575b;
+  --color-deep-800: #00393c;
+  --color-deep-900: #002a2d;
+
+  /* Mint — accents on dark */
+  --color-mint-200: #a9e2e1;
+  --color-mint-300: #8ee0dc;
+  --color-mint-400: #5fd3d0;
+  --color-on-deep: #bcd6d6;
+  --color-on-deep-dim: #9dbcbc;
+  --color-nav-idle: #a8c6c6;
+
+  /* Paper — light surfaces */
+  --color-paper: #fbfcfb;
+  --color-paper-050: #fafcfb;
+  --color-paper-100: #f4f6f5;
+  --color-paper-200: #eef3f2;
+  --color-paper-300: #eaf1f0;
+  --color-paper-400: #e2ecea;
+  --color-paper-tint: #f2f8f7;
+  --color-paper-row: #f6faf9;
+  --color-paper-shell: #f2f6f5;
+  --color-avatar: #e4efee;
+
+  /* Hairlines */
+  --color-line-100: #e8eeed;
+  --color-line: #e2e9e8;
+  --color-line-200: #dde6e5;
+  --color-line-300: #d9e4e3;
+  --color-line-400: #cfdedd;
+  --color-line-500: #b9d0cf;
+
+  /* Portal accents */
+  --color-chevron: #a8bcbc;
+  --color-meta-dim: #9db1b2;
+  --color-ok: #1c6b4d;
+  --color-ok-bg: #e2f0ea;
+  --color-warn: #8a6416;
+  --color-warn-bg: #f7efdd;
+  --color-neutral: #40606e;
+  --color-neutral-bg: #e6edf3;
+  --color-danger: #a33b3b;
+  --color-danger-bg: #fbf3f3;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -11,4 +79,53 @@ html {
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Diagonal hatch used behind image slots — light and dark variants. */
+.nh-hatch-dark {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(160, 225, 225, 0.14) 0 2px,
+    transparent 2px 11px
+  );
+}
+
+.nh-hatch-light {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(0, 103, 108, 0.09) 0 2px,
+    transparent 2px 11px
+  );
+}
+
+/* Measurement grid behind dark screens, faded out toward the edges. */
+.nh-grid,
+.nh-grid-login {
+  background-image:
+    linear-gradient(#7fd0d1 1px, transparent 1px),
+    linear-gradient(90deg, #7fd0d1 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+.nh-grid {
+  -webkit-mask-image: radial-gradient(70% 70% at 30% 40%, #000, transparent);
+  mask-image: radial-gradient(70% 70% at 30% 40%, #000, transparent);
+}
+
+/* The login is centred, so its fade is centred too. */
+.nh-grid-login {
+  -webkit-mask-image: radial-gradient(65% 65% at 50% 45%, #000, transparent);
+  mask-image: radial-gradient(65% 65% at 50% 45%, #000, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

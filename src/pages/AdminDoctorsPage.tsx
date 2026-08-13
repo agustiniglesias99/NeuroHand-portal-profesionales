@@ -20,6 +20,11 @@ const EMPTY_FORM: DoctorForm = {
   specialty: '',
 }
 
+const FIELD =
+  'w-full rounded-[9px] border border-line-300 bg-white px-[15px] py-[11px] text-[14.5px] text-ink outline-none transition-colors placeholder:text-ink-200 focus:border-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600'
+
+const LABEL = 'mb-1.5 block text-[13px] font-medium text-ink-500'
+
 export function AdminDoctorsPage() {
   const {
     doctors,
@@ -120,228 +125,278 @@ export function AdminDoctorsPage() {
   })
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="px-6 py-[34px] lg:px-10">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Gestión de médicos</h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            {doctors.length} médico{doctors.length !== 1 ? 's' : ''} registrado{doctors.length !== 1 ? 's' : ''}
+          <p className="m-0 font-meta text-[10.5px] tracking-[.12em] text-brand-600">
+            EQUIPO PROFESIONAL
+          </p>
+          <h1 className="m-0 mt-2.5 font-display text-[30px] font-normal tracking-[-.02em] lg:text-[38px]">
+            Gestión de médicos
+          </h1>
+          <p className="m-0 mt-1 text-[13.5px] text-ink-350">
+            {doctors.length} médico{doctors.length !== 1 ? 's' : ''} registrado
+            {doctors.length !== 1 ? 's' : ''}
           </p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-1.5 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium rounded-lg transition-colors"
+          className="flex items-center gap-2 rounded-[9px] bg-brand-600 px-[22px] py-3 text-[14px] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" d="M12 5v14M5 12h14" />
           </svg>
           Añadir médico
         </button>
       </div>
 
-      {/* Search */}
+      <label htmlFor="doctor-search" className="sr-only">
+        Buscar médicos
+      </label>
       <input
-        type="text"
-        placeholder="Buscar por nombre, matrícula, especialidad o correo..."
+        id="doctor-search"
+        type="search"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-md px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        placeholder="Buscar por nombre, matrícula, especialidad o correo…"
+        className="mt-6 w-full max-w-[520px] rounded-[9px] border border-line-200 bg-white px-[15px] py-3 text-[14px] text-ink outline-none transition-colors placeholder:text-ink-200 focus:border-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600"
       />
 
-      {/* Connection / action errors */}
       {doctorsError && (
-        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <p
+          role="alert"
+          className="mt-5 rounded-[10px] border border-danger/25 bg-danger-bg px-[18px] py-3.5 text-[13.5px] text-danger"
+        >
           Error al cargar médicos desde Supabase: {doctorsError}
         </p>
       )}
       {actionError && (
-        <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <p
+          role="alert"
+          className="mt-5 rounded-[10px] border border-danger/25 bg-danger-bg px-[18px] py-3.5 text-[13.5px] text-danger"
+        >
           {actionError}
         </p>
       )}
 
-      {/* Doctor list */}
       {doctorsLoading ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-          <p className="text-slate-400 text-sm">Cargando médicos…</p>
-        </div>
+        <p className="mt-5 rounded-[13px] border border-line-200 bg-white py-16 text-center text-[14px] text-ink-200">
+          Cargando médicos…
+        </p>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-          <p className="text-slate-400 text-sm">No se encontraron médicos.</p>
-        </div>
+        <p className="mt-5 rounded-[13px] border border-line-200 bg-white py-16 text-center text-[14px] text-ink-200">
+          Ningún médico coincide con la búsqueda.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="mt-5 grid gap-[18px] md:grid-cols-2 2xl:grid-cols-3">
           {filtered.map((doctor) => {
-            const initials = `${doctor.firstName.charAt(0)}${doctor.lastName.charAt(0)}`.toUpperCase()
             const count = patientCount(doctor)
             return (
-              <div key={doctor.id} className="bg-white rounded-xl border border-slate-200 p-5">
-                <div className="flex items-start gap-3">
-                  <div className="w-11 h-11 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold shrink-0">
-                    {initials}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-slate-900">
-                      Dr. {doctor.firstName} {doctor.lastName}
-                    </p>
-                    <p className="text-xs text-slate-500">{doctor.specialty || 'Sin especialidad'}</p>
-
-                    <div className="mt-3 space-y-1 text-xs text-slate-500">
-                      <p>🪪 Matrícula: <span className="text-slate-700">{doctor.licenseNumber || '—'}</span></p>
-                      <p>📍 {doctor.address || '—'}</p>
-                      <p>✉️ {doctor.email}</p>
-                      <p>👥 {count} paciente{count !== 1 ? 's' : ''} asignado{count !== 1 ? 's' : ''}</p>
+              <article
+                key={doctor.id}
+                className="overflow-hidden rounded-[13px] border border-line-200 bg-white transition-colors hover:border-line-500"
+              >
+                <div className="px-[22px] pb-[18px] pt-[22px]">
+                  <div className="flex items-center gap-3.5">
+                    <span
+                      aria-hidden="true"
+                      className="grid h-[46px] w-[46px] flex-none place-items-center rounded-xl bg-brand-600 text-[14px] font-semibold text-white"
+                    >
+                      {`${doctor.firstName.charAt(0)}${doctor.lastName.charAt(0)}`.toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="m-0 truncate text-[16px] font-semibold text-ink">
+                        Dr. {doctor.firstName} {doctor.lastName}
+                      </h2>
+                      <p className="m-0 mt-0.5 text-[13px] text-ink-350">
+                        {doctor.specialty || 'Sin especialidad'}
+                      </p>
                     </div>
+                  </div>
+
+                  <dl className="m-0 mt-5 grid gap-[9px]">
+                    <DetailRow label="MATRÍCULA" value={doctor.licenseNumber || '—'} />
+                    <DetailRow label="SEDE" value={doctor.address || '—'} />
+                    <DetailRow label="CORREO" value={doctor.email} />
+                  </dl>
+
+                  <div className="mt-[18px] flex items-center justify-between gap-3 rounded-[9px] bg-paper-tint px-3.5 py-[11px]">
+                    <span className="text-[13px] text-ink-400">Pacientes asignados</span>
+                    <span className="font-display text-[20px] text-brand-600">{count}</span>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="mt-4 pt-3 border-t border-slate-100">
+                <div className="flex border-t border-line-100">
                   {deletingId === doctor.id ? (
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-red-600">¿Eliminar este médico?</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setDeletingId(null)}
-                          className="px-3 py-1 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          onClick={() => handleDelete(doctor.id)}
-                          className="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </div>
+                    <>
+                      <button
+                        onClick={() => setDeletingId(null)}
+                        className="flex-1 border-r border-line-100 py-3 text-[13.5px] font-medium text-ink-400 transition-colors hover:bg-paper-tint focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-600"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doctor.id)}
+                        className="flex-1 bg-danger-bg py-3 text-[13.5px] font-semibold text-danger transition-colors hover:bg-danger hover:text-white focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-danger"
+                      >
+                        Confirmar baja
+                      </button>
+                    </>
                   ) : (
-                    <div className="flex gap-2">
+                    <>
                       <button
                         onClick={() => openEdit(doctor)}
-                        className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        className="flex-1 border-r border-line-100 py-3 text-[13.5px] font-medium text-brand-600 transition-colors hover:bg-paper-tint focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-600"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => setDeletingId(doctor.id)}
-                        className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+                        className="flex-1 py-3 text-[13.5px] font-medium text-danger transition-colors hover:bg-danger-bg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-danger"
                       >
                         Eliminar
                       </button>
-                    </div>
+                    </>
                   )}
                 </div>
-              </div>
+              </article>
             )
           })}
         </div>
       )}
 
-      {/* Add / Edit modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white">
-              <h2 className="font-semibold text-slate-900">
-                {editingId ? 'Editar médico' : 'Añadir nuevo médico'}
-              </h2>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-deep-900/50 p-4 backdrop-blur-[2px]">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="doctor-modal-title"
+            className="max-h-[90vh] w-full max-w-[560px] overflow-y-auto rounded-2xl bg-paper shadow-[0_28px_60px_rgba(0,25,27,.4)]"
+          >
+            <div className="sticky top-0 flex items-center justify-between gap-4 border-b border-line-100 bg-paper px-6 py-5">
+              <div>
+                <p className="m-0 font-meta text-[10.5px] tracking-[.12em] text-brand-600">
+                  {editingId ? 'EDITAR REGISTRO' : 'NUEVO REGISTRO'}
+                </p>
+                <h2
+                  id="doctor-modal-title"
+                  className="m-0 mt-1.5 font-display text-[24px] font-normal tracking-[-.02em]"
+                >
+                  {editingId ? 'Editar médico' : 'Añadir médico'}
+                </h2>
+              </div>
               <button
                 onClick={closeModal}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Cerrar"
+                className="rounded-md p-1 text-ink-200 transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+                  <path strokeLinecap="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="px-6 py-6">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Nombre</label>
+                  <label htmlFor="firstName" className={LABEL}>
+                    Nombre
+                  </label>
                   <input
-                    type="text"
+                    id="firstName"
                     value={form.firstName}
                     onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={FIELD}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Apellido</label>
+                  <label htmlFor="lastName" className={LABEL}>
+                    Apellido
+                  </label>
                   <input
-                    type="text"
+                    id="lastName"
                     value={form.lastName}
                     onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={FIELD}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Nº de matrícula</label>
+                  <label htmlFor="licenseNumber" className={LABEL}>
+                    Nº de matrícula
+                  </label>
                   <input
-                    type="text"
+                    id="licenseNumber"
                     value={form.licenseNumber}
                     onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })}
                     placeholder="Ej: MN-12345"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={FIELD}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Especialidad</label>
+                  <label htmlFor="specialty" className={LABEL}>
+                    Especialidad
+                  </label>
                   <input
-                    type="text"
+                    id="specialty"
                     value={form.specialty}
                     onChange={(e) => setForm({ ...form, specialty: e.target.value })}
                     placeholder="Ej: Neurología"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={FIELD}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Dirección</label>
+              <div className="mt-4">
+                <label htmlFor="address" className={LABEL}>
+                  Sede
+                </label>
                 <input
-                  type="text"
+                  id="address"
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   placeholder="Calle, número, ciudad"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={FIELD}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Correo electrónico</label>
+              <div className="mt-4">
+                <label htmlFor="doctorEmail" className={LABEL}>
+                  Correo electrónico
+                </label>
                 <input
+                  id="doctorEmail"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="medico@hospital.es"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={FIELD}
                 />
               </div>
 
               {formError && (
-                <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                <p
+                  role="alert"
+                  className="mt-4 rounded-[9px] border border-danger/25 bg-danger-bg px-[15px] py-3 text-[13.5px] text-danger"
+                >
                   {formError}
                 </p>
               )}
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="mt-6 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  className="rounded-[9px] border border-line-300 px-5 py-3 text-[14px] font-medium text-ink-500 transition-colors hover:bg-paper-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="rounded-[9px] bg-brand-600 px-5 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? 'Guardando…' : editingId ? 'Guardar cambios' : 'Añadir médico'}
                 </button>
@@ -350,6 +405,15 @@ export function AdminDoctorsPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex gap-3 text-[13.5px]">
+      <dt className="w-16 flex-none pt-0.5 font-meta text-[10.5px] text-ink-200">{label}</dt>
+      <dd className="m-0 min-w-0 break-words text-ink-600">{value}</dd>
     </div>
   )
 }
