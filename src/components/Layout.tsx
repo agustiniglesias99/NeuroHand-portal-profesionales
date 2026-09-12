@@ -32,10 +32,10 @@ export function Layout() {
             aria-hidden="true"
             className="grid h-[34px] w-[34px] flex-none place-items-center rounded-[9px] bg-brand-600 text-[12px] font-semibold text-white"
           >
-            NH
+            K
           </span>
           <div className="min-w-0">
-            <p className="m-0 font-display text-[17px] leading-[1.15] text-white">NeuroHand</p>
+            <p className="m-0 font-display text-[17px] leading-[1.15] text-white">KINESIS</p>
             <p className="m-0 mt-0.5 font-meta text-[10px] tracking-[.1em] text-[#7fadad]">
               PORTAL MÉDICO
             </p>

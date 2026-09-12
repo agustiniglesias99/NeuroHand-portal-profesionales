@@ -74,6 +74,7 @@ export async function updateDoctorRow(id: string, partial: Partial<Doctor>): Pro
     throw new Error(
       'No se actualizó ningún registro. Revisá las políticas RLS de UPDATE en Supabase (o que el id exista).',
     )
+ 
   }
 }
 

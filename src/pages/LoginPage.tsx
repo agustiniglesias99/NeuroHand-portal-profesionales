@@ -65,9 +65,9 @@ export function LoginPage() {
               aria-hidden="true"
               className="grid h-[34px] w-[34px] place-items-center rounded-[9px] bg-brand-600 text-[12px] font-semibold"
             >
-              NH
+              K
             </span>
-            <span className="font-display text-[21px]">NeuroHand</span>
+            <span className="font-display text-[21px]">KINESIS</span>
           </div>
 
           <h1 className="mt-[34px] font-display text-[38px] font-normal leading-[1.08] tracking-[-.025em] lg:text-[52px]">
@@ -85,7 +85,7 @@ export function LoginPage() {
         <div className="rounded-2xl bg-paper px-6 py-8 text-ink shadow-[0_28px_60px_rgba(0,25,27,.4)] sm:px-9 sm:py-[38px]">
           <p className="font-meta text-[10.5px] tracking-[.12em] text-brand-600">INICIAR SESIÓN</p>
           <h2 className="mt-3 font-display text-[30px] font-normal tracking-[-.02em]">
-            NeuroHand Portal
+            KINESIS Portal
           </h2>
 
           <form onSubmit={handleSubmit} noValidate>

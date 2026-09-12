@@ -1,13 +1,19 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import heroImg from '../assets/hero.png'
+import { Reveal } from '../components/Reveal'
+import heroImg from '../assets/rect_lofo.jpeg'
+import squareLogo from '../assets/squareLogo.jpeg'
 
 /** Content shell: section backgrounds bleed full width, content stays centred. */
 const SHELL = 'mx-auto w-full max-w-[1440px] px-6 md:px-10 lg:px-14'
 
+/** Stagger between the blocks of a section, and between cards within a grid. */
+const STEP = 90
+const CARD_STEP = 70
+
 const NAV_LINKS = [
   { href: '#nosotros', label: 'Nosotros' },
-  { href: '#guante', label: 'El Guante NeuroHand' },
+  { href: '#guante', label: 'El Guante Kinesis' },
   { href: '#imagenes', label: 'Imágenes' },
   { href: '#contacto', label: 'Contacto' },
 ]
@@ -39,7 +45,7 @@ function Header() {
         <a href="#top" className="flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
           <Monogram />
           <span className="font-display text-[21px] font-medium tracking-[-.01em] text-ink">
-            NeuroHand
+            KINESIS
           </span>
         </a>
 
@@ -94,15 +100,23 @@ function Header() {
   )
 }
 
+/**
+ * Brand tile. The source asset is the full lockup (hand + wordmark + tagline),
+ * so it is cropped to the hand symbol: at this size the wordmark would be
+ * unreadable, and the text next to the tile already reads KINESIS.
+ */
 function Monogram({ size = 'md' }: { size?: 'sm' | 'md' }) {
-  const box = size === 'sm' ? 'h-7 w-7 rounded-lg text-[10.5px]' : 'h-[34px] w-[34px] rounded-[9px] text-[12px]'
+  const box = size === 'sm' ? 'h-7 w-7 rounded-lg' : 'h-[34px] w-[34px] rounded-[9px]'
   return (
     <span
       aria-hidden="true"
-      className={`grid place-items-center bg-brand-600 font-semibold tracking-[.04em] text-white ${box}`}
-    >
-      NH
-    </span>
+      className={`block flex-none bg-white bg-no-repeat ${box}`}
+      style={{
+        backgroundImage: `url(${squareLogo})`,
+        backgroundSize: '100%',
+        //backgroundPosition: '54% 40%',
+      }}
+    />
   )
 }
 
@@ -137,25 +151,39 @@ function Hero() {
         className={`${SHELL} relative grid items-center gap-14 lg:grid-cols-[1.05fr_.95fr] lg:gap-16`}
       >
         <div className="max-w-[600px]">
-          <p className="inline-flex items-center gap-[9px] rounded-full border border-mint-200/35 bg-brand-600/35 py-[7px] pl-[11px] pr-[14px]">
+          <Reveal
+            as="p"
+            immediate
+            className="inline-flex items-center gap-[9px] rounded-full border border-mint-200/35 bg-brand-600/35 py-[7px] pl-[11px] pr-[14px]"
+          >
             <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-mint-400" />
             <span className="font-meta text-[11px] uppercase tracking-[.09em] text-mint-200">
               Rehabilitación motora de la mano
             </span>
-          </p>
+          </Reveal>
 
-          <h1 className="mt-[26px] font-display text-[42px] font-normal leading-[1.05] tracking-[-.025em] text-pretty sm:text-[54px] lg:text-[66px]">
+          <Reveal
+            as="h1"
+            immediate
+            delay={80}
+            className="mt-[26px] font-display text-[42px] font-normal leading-[1.05] tracking-[-.025em] text-pretty sm:text-[54px] lg:text-[66px]"
+          >
             Rehabilitación más <em className="italic text-mint-300">interactiva</em>, accesible y
             medible
-          </h1>
+          </Reveal>
 
-          <p className="mt-[26px] max-w-[520px] text-[17px] leading-[1.62] text-on-deep">
-            NeuroHand combina un guante inteligente sensorizado con una plataforma digital
+          <Reveal
+            as="p"
+            immediate
+            delay={160}
+            className="mt-[26px] max-w-[520px] text-[17px] leading-[1.62] text-on-deep"
+          >
+            Kinesis combina un guante inteligente sensorizado con una plataforma digital
             interactiva para acompañar la rehabilitación motriz de la mano, favoreciendo la
             adherencia al tratamiento y el seguimiento del proceso terapéutico.
-          </p>
+          </Reveal>
 
-          <div className="mt-9 flex flex-wrap gap-3">
+          <Reveal immediate delay={240} className="mt-9 flex flex-wrap gap-3">
             <a
               href="#guante"
               className="rounded-[9px] bg-white px-[26px] py-3.5 text-[15px] font-semibold text-deep-800 transition-colors hover:bg-[#d9f0ef] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint-300"
@@ -168,9 +196,14 @@ function Hero() {
             >
               Contactanos
             </a>
-          </div>
+          </Reveal>
 
-          <dl className="mt-14 flex flex-wrap gap-x-11 gap-y-6 border-t border-mint-200/20 pt-7">
+          <Reveal
+            as="dl"
+            immediate
+            delay={320}
+            className="mt-14 flex flex-wrap gap-x-11 gap-y-6 border-t border-mint-200/20 pt-7"
+          >
             {HERO_STATS.map((stat) => (
               <div key={stat.label}>
                 <dt className="sr-only">{stat.label}</dt>
@@ -180,17 +213,21 @@ function Hero() {
                 </dd>
               </div>
             ))}
-          </dl>
+          </Reveal>
         </div>
 
-        <div className="relative grid h-[340px] place-items-center overflow-hidden rounded-2xl border border-mint-200/[.28] bg-[linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02))] lg:h-[440px]">
+        <Reveal
+          immediate
+          delay={160}
+          className="relative grid h-[340px] place-items-center overflow-hidden rounded-2xl border border-mint-200/[.28] bg-[linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02))] lg:h-[440px]"
+        >
           <div className="nh-hatch-dark absolute inset-0" aria-hidden="true" />
           <img
             src={heroImg}
-            alt="Guante NeuroHand colocado en una mano"
+            alt="Guante Kinesis colocado en una mano"
             className="relative max-h-[78%] w-auto max-w-[70%] object-contain drop-shadow-[0_18px_40px_rgba(0,25,27,.45)]"
           />
-        </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -220,14 +257,16 @@ function Nosotros() {
   return (
     <section id="nosotros" className="scroll-mt-24 bg-paper py-20 lg:py-[104px]">
       <div className={SHELL}>
-        <Eyebrow rule>Nosotros</Eyebrow>
-        <h2 className="mt-5 max-w-[640px] font-display text-[34px] font-normal leading-[1.1] tracking-[-.02em] text-ink lg:text-[46px]">
-          Una solución integral para la rehabilitación
-        </h2>
+        <Reveal>
+          <Eyebrow rule>Nosotros</Eyebrow>
+          <h2 className="mt-5 max-w-[640px] font-display text-[34px] font-normal leading-[1.1] tracking-[-.02em] text-ink lg:text-[46px]">
+            Una solución integral para la rehabilitación
+          </h2>
+        </Reveal>
 
-        <div className="mt-10 grid max-w-[1100px] gap-10 md:grid-cols-2 md:gap-14">
+        <Reveal delay={STEP} className="mt-10 grid max-w-[1100px] gap-10 md:grid-cols-2 md:gap-14">
           <p className="m-0 text-[16.5px] leading-[1.7] text-ink-500">
-            NeuroHand nace para brindar una experiencia de rehabilitación motora más interactiva,
+            Kinesis nace para brindar una experiencia de rehabilitación motora más interactiva,
             accesible y medible. Nuestra propuesta integra tecnologías de sensado, seguimiento y
             actividades terapéuticas digitales con el fin de acompañar los procesos de
             rehabilitación de manera más participativa y cuantificable.
@@ -238,9 +277,14 @@ function Nosotros() {
             complementan —sin reemplazar— la labor del profesional de la salud y potencian el
             vínculo con el paciente durante todo el tratamiento.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mt-14 grid gap-px overflow-hidden rounded-[14px] border border-line-200 bg-line-200 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
+        {/* The 1px gaps are the card dividers, so the grid moves as one piece —
+            staggering the cards would tear those hairlines apart mid-animation. */}
+        <Reveal
+          delay={STEP * 2}
+          className="mt-14 grid gap-px overflow-hidden rounded-[14px] border border-line-200 bg-line-200 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3"
+        >
           {PILLARS.map((pillar) => (
             <div
               key={pillar.index}
@@ -253,7 +297,7 @@ function Nosotros() {
               <p className="m-0 text-[15px] leading-[1.65] text-ink-400">{pillar.text}</p>
             </div>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -274,26 +318,33 @@ function Guante() {
       className="scroll-mt-24 border-y border-line bg-paper-200 py-20 lg:py-[100px]"
     >
       <div className={`${SHELL} grid items-center gap-12 lg:grid-cols-2 lg:gap-16`}>
-        <div className="relative order-last grid h-[320px] place-items-center overflow-hidden rounded-[14px] border border-[#d3e0de] bg-paper-400 lg:order-first lg:h-[420px]">
+        <Reveal className="relative order-last grid h-[320px] place-items-center overflow-hidden rounded-[14px] border border-[#d3e0de] bg-paper-400 lg:order-first lg:h-[420px]">
           <div className="nh-hatch-light absolute inset-0" aria-hidden="true" />
           <img
             src={heroImg}
-            alt="Detalle del guante NeuroHand"
+            alt="Detalle del guante Kinesis"
             className="relative max-h-[76%] w-auto max-w-[68%] object-contain"
           />
-        </div>
+        </Reveal>
 
         <div>
-          <Eyebrow rule>El guante NeuroHand</Eyebrow>
-          <h2 className="mt-5 font-display text-[32px] font-normal leading-[1.1] tracking-[-.02em] text-ink lg:text-[44px]">
-            Tecnología sensorizada al servicio de la recuperación
-          </h2>
-          <p className="mt-[22px] max-w-[520px] text-[16.5px] leading-[1.7] text-ink-500">
-            Un guante ligero y ergonómico que convierte cada sesión de rehabilitación en una
-            experiencia interactiva y medible.
-          </p>
+          <Reveal delay={STEP}>
+            <Eyebrow rule>El guante Kinesis</Eyebrow>
+            <h2 className="mt-5 font-display text-[32px] font-normal leading-[1.1] tracking-[-.02em] text-ink lg:text-[44px]">
+              Tecnología sensorizada al servicio de la recuperación
+            </h2>
+            <p className="mt-[22px] max-w-[520px] text-[16.5px] leading-[1.7] text-ink-500">
+              Un guante ligero y ergonómico que convierte cada sesión de rehabilitación en una
+              experiencia interactiva y medible.
+            </p>
+          </Reveal>
 
-          <ul className="mt-[34px] grid list-none gap-0.5 overflow-hidden rounded-xl bg-line-300 p-0">
+          {/* Same hairline-gap construction as the pillars — reveal the list as one piece. */}
+          <Reveal
+            as="ul"
+            delay={STEP * 2}
+            className="mt-[34px] grid list-none gap-0.5 overflow-hidden rounded-xl bg-line-300 p-0"
+          >
             {GLOVE_FEATURES.map((feature) => (
               <li
                 key={feature.index}
@@ -305,7 +356,7 @@ function Guante() {
                 <span className="text-[15.5px] text-ink-600">{feature.text}</span>
               </li>
             ))}
-          </ul>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -327,7 +378,7 @@ function Imagenes() {
   return (
     <section id="imagenes" className="scroll-mt-24 bg-paper py-20 lg:py-[104px]">
       <div className={SHELL}>
-        <div className="mx-auto max-w-[660px] text-center">
+        <Reveal className="mx-auto max-w-[660px] text-center">
           <span className="font-meta text-[11px] uppercase tracking-[.12em] text-brand-600">
             Imágenes
           </span>
@@ -336,14 +387,18 @@ function Imagenes() {
           </h2>
           <p className="mt-4 text-[16.5px] leading-[1.65] text-ink-400">
             Una mirada al guante, la plataforma y las experiencias terapéuticas que componen
-            NeuroHand.
+            Kinesis.
           </p>
-        </div>
+        </Reveal>
 
+        {/* Cards are observed one by one, so the stagger runs across a row only —
+            later rows already arrive late by virtue of the scroll. */}
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:mt-[52px] lg:grid-cols-3">
-          {GALLERY.map((item) => (
-            <figure
+          {GALLERY.map((item, index) => (
+            <Reveal
               key={item.tag}
+              as="figure"
+              delay={(index % 3) * CARD_STEP}
               className="relative m-0 aspect-4/3 overflow-hidden rounded-[13px] border border-[#dbe5e4] bg-paper-300"
             >
               <div className="nh-hatch-light absolute inset-0" aria-hidden="true" />
@@ -357,13 +412,13 @@ function Imagenes() {
               <figcaption className="absolute bottom-3.5 left-4 text-[15px] font-medium text-white">
                 {item.name}
               </figcaption>
-            </figure>
+            </Reveal>
           ))}
         </div>
 
-        <p className="mt-[26px] text-center font-meta text-[11.5px] text-ink-200">
+        <Reveal as="p" className="mt-[26px] text-center font-meta text-[11.5px] text-ink-200">
           Imágenes ilustrativas — se reemplazarán por fotografías reales del producto.
-        </p>
+        </Reveal>
       </div>
     </section>
   )
@@ -372,7 +427,7 @@ function Imagenes() {
 /* -------------------------------------------------------------- Contacto */
 
 const CONTACT_DETAILS = [
-  { label: 'MAIL', value: 'contacto@neurohand.com' },
+  { label: 'MAIL', value: 'contacto@kinesis.com' },
   { label: 'SEDE', value: 'Universidad Nacional de La Matanza — Equipo 101' },
 ]
 
@@ -390,7 +445,7 @@ function Contacto() {
       className="scroll-mt-24 bg-deep-800 bg-[radial-gradient(90%_120%_at_10%_0%,#00575b_0%,#00393c_55%,#002a2d_100%)] py-20 text-white lg:py-[100px]"
     >
       <div className={`${SHELL} grid items-start gap-12 lg:grid-cols-2 lg:gap-[72px]`}>
-        <div>
+        <Reveal>
           <Eyebrow rule tone="dark">
             Contacto
           </Eyebrow>
@@ -398,7 +453,7 @@ function Contacto() {
             Hablemos sobre tu institución
           </h2>
           <p className="mt-[22px] max-w-[460px] text-[16.5px] leading-[1.7] text-on-deep">
-            ¿Querés incorporar NeuroHand en tu centro de rehabilitación o conocer más sobre la
+            ¿Querés incorporar Kinesis en tu centro de rehabilitación o conocer más sobre la
             solución? Escribinos y nos pondremos en contacto.
           </p>
 
@@ -415,9 +470,12 @@ function Contacto() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
 
-        <div className="rounded-[14px] bg-paper p-6 text-ink shadow-[0_20px_50px_rgba(0,25,27,.35)] sm:p-8">
+        <Reveal
+          delay={STEP}
+          className="rounded-[14px] bg-paper p-6 text-ink shadow-[0_20px_50px_rgba(0,25,27,.35)] sm:p-8"
+        >
           {sent ? (
             <div className="py-6 text-center">
               <p className="m-0 font-display text-[26px] text-deep-800">Mensaje enviado</p>
@@ -471,7 +529,7 @@ function Contacto() {
               </p>
             </form>
           )}
-        </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -517,10 +575,10 @@ function Footer() {
       >
         <div className="flex items-center gap-[11px]">
           <Monogram size="sm" />
-          <span className="font-display text-[17px] text-white">NeuroHand</span>
+          <span className="font-display text-[17px] text-white">KINESIS</span>
         </div>
         <p className="m-0 text-center text-[13px]">
-          © 2026 NeuroHand · Rehabilitación motora interactiva
+          © 2026 KINESIS · Rehabilitación motora interactiva
         </p>
         <Link
           to="/login"
