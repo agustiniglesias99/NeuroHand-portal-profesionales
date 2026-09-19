@@ -4,18 +4,97 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- main
+  branches:
+    include:
+      - main
 
-pool:
-  vmImage: ubuntu-latest
+variables:
+  nodeVersion: '20.x'
+  buildOutput: 'dist'   # 'build' si usás CRA
+  scmHost: 'mi-app-abc123.scm.eastus-01.azurewebsites.net'  # sin https:// ni :443
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+stages:
+- stage: Build
+  displayName: 'Build'
+  jobs:
+  - job: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(nodeVersion)
+      displayName: 'Instalar Node.js'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+    - script: npm ci
+      displayName: 'npm ci'
+
+    - script: npm run build
+      displayName: 'Build de producción'
+
+    - script: |
+        set -e
+        mkdir -p $(Build.ArtifactStagingDirectory)/app
+        cp -r $(buildOutput) $(Build.ArtifactStagingDirectory)/app/
+        cp server.js $(Build.ArtifactStagingDirectory)/app/
+        cp deploy/package.json $(Build.ArtifactStagingDirectory)/app/
+        cd $(Build.ArtifactStagingDirectory)/app
+        npm install --omit=dev
+      displayName: 'Armar paquete de deploy'
+
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/app'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+        replaceExistingArchive: true
+      displayName: 'Comprimir'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/app.zip'
+      artifact: drop
+      displayName: 'Publicar artefacto'
+
+- stage: Deploy
+  displayName: 'Deploy a Azure'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: DeployKudu
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - download: current
+      artifact: drop
+
+    - script: |
+        set -e
+        echo "Subiendo paquete a $SCM_HOST..."
+        HTTP_CODE=$(curl -sS -o /tmp/respuesta.txt -w "%{http_code}" \
+          -X POST \
+          -u "$SCM_USER:$SCM_PASSWORD" \
+          -H "Content-Type: application/zip" \
+          --data-binary "@$(Pipeline.Workspace)/drop/app.zip" \
+          "https://$SCM_HOST/api/publish?type=zip&restart=true")
+
+        echo "HTTP $HTTP_CODE"
+        cat /tmp/respuesta.txt
+
+        if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+          echo "##vso[task.logissue type=error]El deploy falló con HTTP $HTTP_CODE"
+          exit 1
+        fi
+      displayName: 'Deploy vía Kudu ZipDeploy'
+      env:
+        SCM_USER: $(scmUser)
+        SCM_PASSWORD: $(scmPassword)
+        SCM_HOST: $(scmHost)
+
+    - script: |
+        curl -sS -u "$SCM_USER:$SCM_PASSWORD" \
+          "https://$SCM_HOST/api/deployments/latest"
+      displayName: 'Verificar último deployment'
+      env:
+        SCM_USER: $(scmUser)
+        SCM_PASSWORD: $(scmPassword)
+        SCM_HOST: $(scmHost)
