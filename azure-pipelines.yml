@@ -97,4 +97,4 @@ stages:
       env:
         SCM_USER: $(scmUser)
         SCM_PASSWORD: $(scmPassword)
-        SCM_HOST: $(scmHost)
+        SCM_HOST: $(scmHost)gt
