@@ -11,7 +11,7 @@ trigger:
 variables:
   nodeVersion: '20.x'
   buildOutput: 'dist'   # 'build' si usás CRA
-  scmHost: 'mi-app-abc123.scm.eastus-01.azurewebsites.net'  # sin https:// ni :443
+  scmHost: 'kinesis-f8bzeshvhva3ebgy.brazilsouth-01.azurewebsites.net/'  # sin https:// ni :443
 
 stages:
 - stage: Build
