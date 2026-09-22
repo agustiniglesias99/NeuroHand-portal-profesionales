@@ -10,16 +10,24 @@ import { PatientDetailPage } from './pages/PatientDetailPage'
 import { ActivitiesPage } from './pages/ActivitiesPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { AdminDoctorsPage } from './pages/AdminDoctorsPage'
+import { UserRole } from './types'
 
 function ProtectedLayout() {
-  const { isAuthenticated } = useAuth()
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  const { user } = useAuth()
+  if (
+    !user ||
+    (user.role !== UserRole.ACCOUNT_ADMIN && user.role !== UserRole.THERAPIST)
+  ) {
+    return <Navigate to="/login" replace />
+  }
   return <Layout />
 }
 
 function AdminRoute({ children }: { children: ReactNode }) {
   const { user } = useAuth()
-  if (user?.role !== 'admin') return <Navigate to="/dashboard" replace />
+  if (user?.role !== UserRole.ACCOUNT_ADMIN) {
+    return <Navigate to="/dashboard" replace />
+  }
   return <>{children}</>
 }
 

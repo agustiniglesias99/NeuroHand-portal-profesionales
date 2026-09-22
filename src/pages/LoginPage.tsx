@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { UserRole } from '../types'
 
 function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
@@ -31,7 +32,11 @@ export function LoginPage() {
 
     // Admin access
     if (localPart === 'admin') {
-      login({ email: normalized, role: 'admin', displayName: 'Administrador' })
+      login({
+        email: normalized,
+        role: UserRole.ACCOUNT_ADMIN,
+        displayName: 'Administrador',
+      })
       navigate('/admin/doctors')
       return
     }
@@ -41,7 +46,7 @@ export function LoginPage() {
     if (doctor) {
       login({
         email: normalized,
-        role: 'doctor',
+        role: UserRole.THERAPIST,
         doctorId: doctor.id,
         displayName: `Dr. ${doctor.firstName} ${doctor.lastName}`.trim(),
       })
@@ -49,7 +54,7 @@ export function LoginPage() {
       // El correo no corresponde a ningún médico registrado: sesión sin perfil editable.
       const parts = localPart.split('.')
       const displayName = `Dr. ${capitalize(parts[0] ?? 'Médico')} ${capitalize(parts[1] ?? '')}`.trim()
-      login({ email: normalized, role: 'doctor', displayName })
+      login({ email: normalized, role: UserRole.THERAPIST, displayName })
     }
     navigate('/dashboard')
   }
