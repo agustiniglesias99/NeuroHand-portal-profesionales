@@ -1,24 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useData } from '../context/DataContext'
-
-function capitalize(s: string): string {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
-}
+import { ApiError } from '../lib/api'
+import { UserRole } from '../types'
 
 const FIELD =
   'w-full rounded-[9px] border border-line-300 bg-white px-[15px] py-[13px] text-[15px] text-ink outline-none transition-colors placeholder:text-ink-200 focus:border-brand-600 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand-600'
 
 export function LoginPage() {
   const { login } = useAuth()
-  const { doctors } = useData()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
     if (!email || !password) {
@@ -26,32 +23,23 @@ export function LoginPage() {
       return
     }
 
-    const normalized = email.trim().toLowerCase()
-    const localPart = normalized.split('@')[0]
-
-    // Admin access
-    if (localPart === 'admin') {
-      login({ email: normalized, role: 'admin', displayName: 'Administrador' })
-      navigate('/admin/doctors')
-      return
+    setIsSubmitting(true)
+    try {
+      const user = await login(email.trim(), password)
+      navigate(user.role === UserRole.ACCOUNT_ADMIN ? '/admin/doctors' : '/dashboard')
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        setError('El correo o la contraseña son incorrectos.')
+      } else if (err instanceof ApiError && err.status === 400) {
+        setError('Revisá el formato del correo y la contraseña.')
+      } else if (err instanceof TypeError) {
+        setError('No se pudo conectar con la API. Intentá nuevamente.')
+      } else {
+        setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión.')
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-
-    // Doctor access — match an existing record in Supabase by email
-    const doctor = doctors.find((d) => d.email.toLowerCase() === normalized)
-    if (doctor) {
-      login({
-        email: normalized,
-        role: 'doctor',
-        doctorId: doctor.id,
-        displayName: `Dr. ${doctor.firstName} ${doctor.lastName}`.trim(),
-      })
-    } else {
-      // El correo no corresponde a ningún médico registrado: sesión sin perfil editable.
-      const parts = localPart.split('.')
-      const displayName = `Dr. ${capitalize(parts[0] ?? 'Médico')} ${capitalize(parts[1] ?? '')}`.trim()
-      login({ email: normalized, role: 'doctor', displayName })
-    }
-    navigate('/dashboard')
   }
 
   return (
@@ -98,6 +86,7 @@ export function LoginPage() {
               autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
               placeholder="medico@hospital.es"
               className={`mt-2 ${FIELD}`}
             />
@@ -111,6 +100,7 @@ export function LoginPage() {
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isSubmitting}
               placeholder="••••••••"
               className={`mt-2 ${FIELD}`}
             />
@@ -126,20 +116,12 @@ export function LoginPage() {
 
             <button
               type="submit"
-              className="mt-[26px] w-full rounded-[9px] bg-brand-600 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+              disabled={isSubmitting}
+              className="mt-[26px] w-full rounded-[9px] bg-brand-600 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Iniciar sesión
+              {isSubmitting ? 'Iniciando sesión…' : 'Iniciar sesión'}
             </button>
           </form>
-
-          <div className="mt-[22px] rounded-[10px] border border-line-200 bg-paper-tint px-[18px] py-4">
-            <p className="m-0 text-[12.5px] font-semibold text-deep-800">Accesos de demostración</p>
-            <div className="mt-2.5 grid gap-[5px] font-meta text-[11.5px] text-ink-400">
-              <span>Médico · javier.garcia@hospital.es</span>
-              <span>Administrador · admin@hospital.es</span>
-              <span className="text-ink-200">(cualquier contraseña)</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
