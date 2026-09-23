@@ -9,6 +9,7 @@ variables:
   nodeVersion: '22.x'
   artifactName: 'portal-medico-dist'
   deployPath: '/var/www/kinesis/backoffice/'
+  VITE_API_URL: 'https://api.kinesis.com.ar'
   VITE_SUPABASE_URL: 'REEMPLAZAR_CON_URL_DE_SUPABASE'
   VITE_SUPABASE_ANON_KEY: 'REEMPLAZAR_CON_ANON_KEY_DE_SUPABASE'
 
@@ -32,6 +33,7 @@ stages:
           - script: npm run build
             displayName: 'Generar bundle de produccion'
             env:
+              VITE_API_URL: $(VITE_API_URL)
               VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
               VITE_SUPABASE_ANON_KEY: $(VITE_SUPABASE_ANON_KEY)
 
