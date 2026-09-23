@@ -13,6 +13,12 @@ export interface ApiCurrentUser {
   role: UserRoleValue
   status: string
   accountId: string | null
+  profile: {
+    type: string,
+    id: string,
+    firstName: string,
+    lastName: string
+  } | null
 }
 
 export interface AuthenticatedSession {

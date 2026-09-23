@@ -55,7 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: authenticated.user.email,
       role: authenticated.user.role,
       accountId: authenticated.user.accountId,
-      displayName: authenticated.user.email,
+      displayName: authenticated.user.profile?.firstName && authenticated.user.profile?.lastName
+        ? `${authenticated.user.profile.firstName} ${authenticated.user.profile.lastName}`
+        : authenticated.user.email,
     }
     setSession({
       user,
