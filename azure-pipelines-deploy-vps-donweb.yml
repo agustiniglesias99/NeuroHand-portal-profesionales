@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - poc/deploy-vps-donweb
+      - main
 
 pr: none
 
