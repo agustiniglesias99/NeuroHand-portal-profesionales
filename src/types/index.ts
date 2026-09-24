@@ -1,7 +1,15 @@
 export type PatientStatus = 'active' | 'discharged' | 'on-hold'
 export type ActivityStatus = 'active' | 'completed' | 'paused'
 export type ActivityCategory = 'motor' | 'cognitivo' | 'sensorial' | 'coordinación'
-export type UserRole = 'doctor' | 'admin'
+export const UserRole = {
+  SUPERADMIN: 'SUPERADMIN',
+  ACCOUNT_ADMIN: 'ACCOUNT_ADMIN',
+  THERAPIST: 'THERAPIST',
+  PATIENT: 'PATIENT',
+  GUARDIAN: 'GUARDIAN',
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 export interface Session {
   id: string

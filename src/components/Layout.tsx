@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { UserRole } from '../types'
 
 const DOCTOR_NAV = [
   { to: '/dashboard', label: 'Inicio' },
@@ -12,12 +13,40 @@ const ADMIN_NAV = [
   { to: '/admin/doctors', label: 'Médicos' },
 ]
 
+function navigationFor(role: UserRole) {
+  switch (role) {
+    case UserRole.ACCOUNT_ADMIN:
+      return ADMIN_NAV
+    case UserRole.THERAPIST:
+      return DOCTOR_NAV
+    case UserRole.SUPERADMIN:
+    case UserRole.PATIENT:
+    case UserRole.GUARDIAN:
+      return []
+  }
+}
+
+function roleLabelFor(role: UserRole) {
+  switch (role) {
+    case UserRole.ACCOUNT_ADMIN:
+      return 'Administrador'
+    case UserRole.THERAPIST:
+      return 'Terapeuta'
+    case UserRole.SUPERADMIN:
+      return 'KINESIS Admin'
+    case UserRole.PATIENT:
+      return 'Paciente'
+    case UserRole.GUARDIAN:
+      return 'Tutor'
+  }
+}
+
 export function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const navItems = user?.role === 'admin' ? ADMIN_NAV : DOCTOR_NAV
-  const roleLabel = user?.role === 'admin' ? 'Administrador' : 'Médico'
+  const navItems = user ? navigationFor(user.role) : []
+  const roleLabel = user ? roleLabelFor(user.role) : ''
 
   function handleLogout() {
     logout()
